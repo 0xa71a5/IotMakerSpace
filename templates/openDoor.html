@@ -1,0 +1,58 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+<meta name="keywords" content="Flat Dark Web Login Form Responsive Templates, Iphone Widget Template, Smartphone login forms,Login form, Widget Template, Responsive Templates, a Ipad 404 Templates, Flat Responsive Templates" />
+<link href="{{ static_url('css/style.css') }}" rel='stylesheet' type='text/css' />
+<!--webfonts-->
+<!--//webfonts-->
+<script src="{{ static_url('css/jquery.min.js') }}"></script>
+</head>
+<body>
+<script type="text/javascript">
+    function openDoor()
+    {
+        alert("openDoor");
+    }
+</script>
+<script>$(document).ready(function(c) {
+$('.close').on('click', function(c){
+$('.login-form').fadeOut('slow', function(c){
+$('.login-form').remove();
+});
+});
+});
+</script>
+<!--SIGN UP-->
+<h1>创客空间 远程控制</h1>
+<div class="login-form">
+<div class="close"> </div>
+<div class="head-info">
+<label class="lbl-1"> </label>
+<label class="lbl-2"> </label>
+<label class="lbl-3"> </label>
+</div>
+<div class="clear"> </div>
+<div class="avtar">
+<img src="{{ static_url('images/avtar.png') }}" />
+</div>
+<div class="key" align='left'>
+<font size="5" face="arial" color="white">姓名:{{ username }}</font><br><br>
+<font size="5" face="arial" color="white">身份:{{ identification }}</font><br><br>
+<font size="5" face="arial" color="white">权限:{{ authority }}</font><br><br>
+<font size="5" face="arial" color="white">权限维持:{{ authorityContinous}}</font><br><br>
+<font size="5" face="arial" color="white">操作状态:{{ opStatus }}</font><br><br>
+<form action="/openDoor" method="post">
+<div class="signin">
+<input type="submit" value="开门">
+</div>
+</form>
+</div>
+<div class="copy-rights">
+<p>Copyright &copy; 2016.东南大学创客空间 All rights reserved.</p>
+</div>
+</body>
+</html>

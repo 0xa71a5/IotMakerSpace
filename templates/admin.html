@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf8">
+</head>
+<body onload="getNowDate()">
+<form action="/admin" method="post" >
+    姓  名:<input type="text" name="upname"/><br><br>
+    一卡通:<input type="text" name="upyicardnumber" /><br><br>
+    身  份:<input type="text" name="upidentification" /><br><br>
+    权  限:<input type="text" name="upauthority" /><br><br>
+    权限维持:<input id="startDate" type="date" name="upbegindate" value="2017-03-03" /><br><br>
+    <input type="submit" value="执行" />
+</form><br/><br/>
+{{ showInfo }}
+</body>
+<script type="text/javascript">
+    function checkTime(i)
+    {
+    if (i<10) 
+      {i="0" + i}
+      return i
+    }
+    function getNowDate()
+    {
+    var today=new Date()
+    var y=today.getFullYear()
+    var m=today.getMonth()+1
+    var d=today.getDate()
+    // add a zero in front of numbers<10
+    m=checkTime(m)
+    d=checkTime(d)
+    document.getElementById('startDate').value=y+"-"+m+"-"+d
+    }
+</script>
+</html>
