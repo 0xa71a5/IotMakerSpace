@@ -21,7 +21,8 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 log=open("log.txt","a")
 listenPort=80
-
+TimeZone=8
+MachineList={}
 
 try:
     uno=serial.Serial("/dev/ttyUSB0",115200)
@@ -33,8 +34,60 @@ except Exception as e:
 todayPassword="S4(mAVdR3yX2ptw"
 rootPassword="12345k"
 
+
+def getdate():
+    global TimeZone
+    timebias=0
+    if(TimeZone!=8):timebias=3600*8
+    t=time.localtime(time.time()+timebias)
+    if(t.tm_mon<10):tm_mon='0'+str(t.tm_mon)
+    else:tm_mon=str(t.tm_mon)
+    if(t.tm_mday<10):tm_mday='0'+str(t.tm_mday)
+    else:tm_mday=str(t.tm_mday)
+    return str(t.tm_year)+tm_mon+tm_mday
+def gettime():
+    global TimeZone
+    timebias=0
+    if(TimeZone!=8):timebias=3600*8
+    t=time.localtime(time.time()+timebias)
+    if(t.tm_mon<10):tm_mon='0'+str(t.tm_mon)
+    else:tm_mon=str(t.tm_mon)
+    if(t.tm_mday<10):tm_mday='0'+str(t.tm_mday)
+    else:tm_mday=str(t.tm_mday)
+    hour=t.tm_hour
+    if(hour<10):tm_hour='0'+str(hour)
+    else:tm_hour=str(hour)
+    if(t.tm_min<10):tm_min='0'+str(t.tm_min)
+    else:tm_min=str(t.tm_min)
+    if(t.tm_sec<10):tm_sec='0'+str(t.tm_sec)
+    else:tm_sec=str(t.tm_sec)
+    return tm_mon+tm_mday+tm_hour+tm_min+tm_sec
+
+class IpIndex(tornado.web.RequestHandler):
+    def post(self):
+        global MachineList
+        ipPassword=self.get_argument('password')
+        if(ipPassword=="456789"):
+            MachineName=self.get_argument('MachineName')
+            MachineIp=self.get_argument("MachineIp")
+            UpdateTime=gettime()
+            MachineList[MachineName]=(MachineIp,UpdateTime)
+            self.write("Record stored!")
+        else:
+            self.write("Password incorrect!")
+    def get(self):
+        global MachineList
+        if(len(MachineList)!=0):
+            cont=""
+            for x in MachineList:
+                cont=cont+x+"\t"+MachineList[x][0]+"\t"+MachineList[x][1]+"<br>"
+            self.write(cont)
+        else:
+            self.write("None record")
+
 def notify():
     global notifyNeededName
+    time.sleep(15)
     SendMail.SendMail("497425817@qq.com","Inform","门被"+notifyNeededName+"打开")
     print "SendMail"
 
@@ -113,11 +166,11 @@ class OpenDoorIndex(tornado.web.RequestHandler):
         identification=Students.getIdentification(cardNumber)
         authority=Students.getAuthority(cardNumber)
         authorityContinous=Students.getAuthorityContinous(cardNumber)
-        timeStamp=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()+3600*8))
+        timeStamp=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
         if(timeCompare(authorityContinous)):
             opStatus="开门成功"
             notifyNeededName=username
-            log.write("["+timeStamp+"]"+self.request.remote_ip+" opendoor->"+" Card:"+cardNumber+" Name:"+username+" Result:Success\n")
+            log.write("["+timeStamp+"]"+self.request.remote_ip+" opendoor->"+" Card:"+cardNumber+" Name:"+str(username)+" Result:Success\n")
             log.flush()
             remoteOpen(1)
         else:
@@ -152,7 +205,7 @@ class LoginIndex(tornado.web.RequestHandler):
         else:
             cardNumber=self.get_argument('CardNumber')
             password=self.get_argument('CardPassword')
-            print cardNumber,password
+            print cardNumber
             identifyStatus=identify.identify(cardNumber,password)
             if(identifyStatus=="success"):
                 self.set_secure_cookie("token","logined")
@@ -162,8 +215,8 @@ class LoginIndex(tornado.web.RequestHandler):
                 identification=Students.getIdentification(cardNumber)
                 authority=Students.getAuthority(cardNumber)
                 authorityContinous=Students.getAuthorityContinous(cardNumber)
-                timeStamp=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()+3600*8))
-                log.write("["+timeStamp+"]"+self.request.remote_ip+" login->"+" Card:"+cardNumber+" Name:"+username+"\n")
+                timeStamp=time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(time.time()))
+                log.write("["+timeStamp+"]"+self.request.remote_ip+" login->  Card:"+cardNumber+" Name:"+username+"\n")
                 log.flush()
                 opStatus=""
                 self.render('openDoor.html',username=username,identification=identification,authority=authority,authorityContinous=authorityContinous,opStatus=opStatus)
@@ -191,13 +244,13 @@ class AdminIndex(tornado.web.RequestHandler):
         loginState=self.get_secure_cookie("token")
         cardNumber=self.get_secure_cookie("cardNumber")
         username=self.get_secure_cookie("userName")
-        if(cardNumber=="213142288"):
+        if(cardNumber=="213142288" or cardNumber=="213150625" or cardNumber=="213151150" or cardNumber=="213152299"):
             self.render('admin.html',showInfo="")
         else:
             self.render('login.html',success=True)
     def post(self):
         cardNumber=self.get_secure_cookie("cardNumber")
-        if(cardNumber=="213142288"):
+        if(cardNumber=="213142288" or cardNumber=="213150625" or cardNumber=="213151150" or cardNumber=="213152299"):
             upname=self.get_argument('upname')
             upcardnumber=self.get_argument('upyicardnumber')
             upidentification=self.get_argument('upidentification')
@@ -235,8 +288,9 @@ if __name__ == '__main__':
 	('/login',LoginIndex),
 	('/openDoor',OpenDoorIndex),
     ('/admin',AdminIndex),
-    ('/log',LogIndex)
-    ],cookie_secret='abcdswweww2!!wsws2',
+    ('/log',LogIndex),
+    ('/ip',IpIndex)
+    ],cookie_secret='abcdswweww2!!wsws',
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static"),
     )
