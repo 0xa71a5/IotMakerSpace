@@ -293,6 +293,7 @@ if __name__ == '__main__':
     ],cookie_secret='abcdswweww2!!wsws',
     template_path=os.path.join(os.path.dirname(__file__), "templates"),
     static_path=os.path.join(os.path.dirname(__file__), "static"),
+    no_keep_alive=True,
     )
     print "Running"
     Students.init()
